@@ -12,34 +12,46 @@ class ChartBar extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Column(children: [
-      Text(' ₹${spendingamt.toStringAsFixed(0)}'),
+      Container(
+        height: 20,
+        child: FittedBox(
+          //FittedBox fits the text in given space
+          child: Text(' ₹${spendingamt.toStringAsFixed(0)}'),
+        ),
+      ),
       SizedBox(height: 4),
       Container(
-          height: 60,
-          width: 10,
-          child: Stack(
-            children: [
-              Container(
+        height: 60,
+        width: 10,
+        child: Stack(
+          children: [
+            Container(
+              decoration: BoxDecoration(
+                border: Border.all(
+                  color: Colors.grey,
+                ),
+                color: Color.fromRGBO(220, 220, 220, 1),
+                borderRadius: BorderRadius.circular(10),
+              ),
+            ),
+            FractionallySizedBox(
+              heightFactor: spendingprcnt,
+              child: Container(
                 decoration: BoxDecoration(
-                  border: Border.all(
-                    color: Colors.grey,
-                  ),
-                  color: Color.fromRGBO(220, 220, 220, 1),
+                  color: Theme.of(context).primaryColor,
                   borderRadius: BorderRadius.circular(10),
                 ),
               ),
-              FractionallySizedBox(
-                heightFactor: spendingprcnt,
-                child: Container(
-                  decoration: BoxDecoration(
-                    color: Theme.of(context).primaryColor,
-                    borderRadius: BorderRadius.circular(10),
-                  ),
-                ),
-              ),
-              // Container()
-            ],
-          ))
+            ),
+            // Container(
+            //   child: ,
+            // )
+          ],
+        ),
+      ),
+      Container(
+        child: Text('$label'),
+      )
     ]);
   }
 }
