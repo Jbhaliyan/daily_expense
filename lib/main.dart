@@ -1,11 +1,15 @@
-import 'package:expense_app_practice/widgets/chart.dart';
-import 'package:expense_app_practice/widgets/transaction-list.dart';
+import 'package:flutter/services.dart';
+import 'widgets/chart.dart';
 import 'package:flutter/material.dart';
-
-import 'models/transaction.dart';
-import 'widgets/new_transaction.dart';
+import 'models/expense.dart';
+import 'widgets/expense_list.dart';
+import 'widgets/new_expense.dart';
 
 void main() {
+  // SystemChrome.setPreferredOrientations([
+  //   DeviceOrientation.portraitUp,
+  //   DeviceOrientation.portraitDown,
+  // ]);
   runApp(MyApp());
 }
 
@@ -16,9 +20,8 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
       title: 'Personal Expenses',
       theme: ThemeData(
-        // primaryColor: Colors.purple,
+        primaryColor: Colors.purple,
         primarySwatch: Colors.purple,
-        // accentColor: Colors.amber,
       ),
       home: MyHomePage(),
     );
@@ -31,10 +34,10 @@ class MyHomePage extends StatefulWidget {
 }
 
 class _MyHomePageState extends State<MyHomePage> {
-  final List<Transaction> _userTransaction = [];
-
-  List<Transaction> get _recentTransaction {
-    return (_userTransaction.where((txt) {
+  final List<Expense> _userExpense = [];
+  bool _showChart = false;
+  List<Expense> get _recentExpense {
+    return (_userExpense.where((txt) {
       return txt.date.isAfter(
         DateTime.now().subtract(
           Duration(days: 7),
@@ -43,65 +46,101 @@ class _MyHomePageState extends State<MyHomePage> {
     }).toList());
   }
 
-  void _addNewTransaction(String title, double amt, DateTime chosenDate) {
-    final newTx = Transaction(
+  void _addNewExpense(String title, double amt, DateTime chosenDate) {
+    final newEx = Expense(
         id: DateTime.now().toString(),
         title: title,
         amt: amt,
         date: chosenDate);
     // final newAmt = amt;
     setState(() {
-      _userTransaction.add(newTx);
+      _userExpense.add(newEx);
     });
   }
 
-  void _startNewTransaction(BuildContext ctx) {
+  void _startNewExpense(BuildContext ctx) {
     showModalBottomSheet(
       context: ctx,
       builder: (_) {
         return GestureDetector(
             onTap: () {},
             behavior: HitTestBehavior.opaque,
-            child: NewTransaction(_addNewTransaction));
+            child: NewExpense(_addNewExpense));
       },
     );
   }
 
-  void _deleteTransaction(String id) {
+  void _deleteExpense(String id) {
     setState(() {
-      _userTransaction.removeWhere((tx) => tx.id == id);
+      _userExpense.removeWhere((tx) => tx.id == id);
     });
   }
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: Text('Flutter App'),
-        actions: [
-          IconButton(
-            onPressed: () => _startNewTransaction(context),
-            icon: Icon(
-              Icons.add,
-              color: Colors.white,
-            ),
+    final mediaQuery=MediaQuery.of(context);
+    final isLandscape =
+         mediaQuery.orientation == Orientation.landscape;
+
+    final appBar = AppBar(
+      title: Text('Daily Expense'),
+      actions: [
+        IconButton(
+          onPressed: () => _startNewExpense(context),
+          icon: Icon(
+            Icons.add,
+            color: Colors.white,
           ),
-        ],
-      ),
+        ),
+      ],
+    );
+    final exList = Container(
+        height: ( mediaQuery.size.height -
+                appBar.preferredSize.height -
+                 mediaQuery.padding.top) *
+            0.7,
+        child: ExpenseList(_userExpense, _deleteExpense));
+    return Scaffold(
+      appBar: appBar,
       body: SingleChildScrollView(
         child: Column(
-          // crossAxisAlignment: CrossAxisAlignment.start,
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Chart(_recentTransaction),
-            // UserTransaction()
-            TransactionList(_userTransaction, _deleteTransaction),
+            if (isLandscape)
+              Row(mainAxisAlignment: MainAxisAlignment.center, children: [
+                Text("Show Chart"),
+                Switch(
+                  value: _showChart,
+                  onChanged: (val) {
+                    setState(() {
+                      _showChart = val;
+                    });
+                  },
+                ),
+              ]),
+            if (!isLandscape)
+              Container(
+                  height: ( mediaQuery.size.height -
+                          appBar.preferredSize.height -
+                          mediaQuery.padding.top) *
+                      0.3,
+                  child: Chart(_recentExpense)),
+            if (!isLandscape) exList,
+            if (isLandscape)
+              _showChart
+                  ? Container(
+                      height: ( mediaQuery.size.height -
+                              appBar.preferredSize.height -
+                               mediaQuery.padding.top) *
+                          0.4,
+                      child: Chart(_recentExpense))
+                  : exList,
           ],
         ),
       ),
       // floatingActionButtonLocation: FloatingActionButtonLocation.centerTop,
       floatingActionButton: FloatingActionButton(
-        onPressed: () => _startNewTransaction(context),
+        onPressed: () => _startNewExpense(context),
         child: Icon(Icons.add),
       ),
     );
