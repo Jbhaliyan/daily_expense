@@ -23,8 +23,8 @@ class Chart extends StatelessWidget {
           totalSum += recentExpense[i].amt;
         }
       }
-      // print(DateFormat.E().format(weekDay));
-      // print(totalSum);
+      print(DateFormat.E().format(weekDay));
+      print(totalSum);
       return {
         'DAY': DateFormat.E().format(weekDay).substring(0),
         'amt': totalSum,
@@ -34,7 +34,7 @@ class Chart extends StatelessWidget {
 
   double get totalSpending {
     return grpdExpenses.fold(0.0, (sum, element) {
-      return sum + (element['amt'] as num);
+      return sum + (element['amt'] as double);
     });
   }
 
