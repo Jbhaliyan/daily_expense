@@ -25,6 +25,7 @@ class _NewExpenseState extends State<NewExpense> {
       enterAmt,
       _selectedDate,
     );
+  
     Navigator.of(context).pop();
   }
 
